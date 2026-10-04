@@ -687,6 +687,8 @@ struct vc4_crtc_state {
 struct vc4_exec_info {
 	struct vc4_dev *dev;
 
+	struct kref refcount;
+
 	/* Sequence number for this bin/render job. */
 	uint64_t seqno;
 
