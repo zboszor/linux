@@ -1754,7 +1754,7 @@ static int smu_v14_0_2_init_ppt_limits(struct smu_context *smu)
         uint32_t pp_limit, msg_limit, min_limit, max_limit;
         int i;
 
-        if (powerplay_table && 
+        if (powerplay_table &&
             smu_v14_0_2_is_od_feature_supported(smu, PP_OD_FEATURE_PPT_BIT)) {
                 od_percent_upper = pptable->SkuTable.OverDriveLimitsBasicMax.Ppt;
                 od_percent_lower = pptable->SkuTable.OverDriveLimitsBasicMin.Ppt;
