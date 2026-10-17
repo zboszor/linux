@@ -2862,6 +2862,10 @@ void amdgpu_vm_fini(struct amdgpu_device *adev, struct amdgpu_vm *vm)
 
 	root = amdgpu_bo_ref(vm->root.bo);
 	amdgpu_bo_reserve(root, true);
+	/* Wait for the jobs which might still use the reserved VMID */
+	if (vm->reserved_vmid[AMDGPU_GFXHUB(0)])
+		dma_resv_wait_timeout(root->tbo.base.resv, DMA_RESV_USAGE_READ,
+				      false, MAX_SCHEDULE_TIMEOUT);
 	dma_fence_wait(vm->last_unlocked, false);
 	dma_fence_put(vm->last_unlocked);
 	dma_fence_wait(vm->last_seq_flush, false);
@@ -3013,9 +3017,19 @@ int amdgpu_vm_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 		}
 		return r;
 	}
-	case AMDGPU_VM_OP_UNRESERVE_VMID:
+	case AMDGPU_VM_OP_UNRESERVE_VMID: {
+		struct amdgpu_bo *root = vm->root.bo;
+
+		amdgpu_bo_reserve(root, true);
+		/* Wait for the jobs which might still use the reserved VMID */
+		if (vm->reserved_vmid[AMDGPU_GFXHUB(0)])
+			dma_resv_wait_timeout(root->tbo.base.resv,
+					      DMA_RESV_USAGE_READ, false,
+					      MAX_SCHEDULE_TIMEOUT);
 		amdgpu_vmid_free_spm(adev, vm, AMDGPU_GFXHUB(0));
+		amdgpu_bo_unreserve(root);
 		break;
+	}
 	default:
 		return -EINVAL;
 	}
