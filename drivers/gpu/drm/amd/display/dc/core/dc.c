@@ -6806,6 +6806,7 @@ static const struct dc2_funcs dc2_legacy_funcs_table = {
 	.hardware_init = legacy_hardware_init,
 	.hardware_release = legacy_hardware_release,
 	.commit_state_hw = legacy_commit_state_hw,
+	.update_state_execute = legacy_update_state_execute,
 };
 
 const struct dc2_funcs *dc2_legacy_funcs(void)
@@ -8528,6 +8529,9 @@ bool dc_update_state_prepare(struct dc_update_scratch_space *scratch)
 	if (!dc_update_probes_prepare(scratch))
 		goto release_scratch;
 
+	if (!api_shim_update_state_supported(scratch))
+		goto release_scratch;
+
 	return true;
 
 release_scratch:
@@ -8536,9 +8540,7 @@ release_scratch:
 	return false;
 }
 
-void dc_update_state_execute(
-		const struct dc_update_scratch_space *scratch
-)
+void legacy_update_state_execute(const struct dc_update_scratch_space *scratch)
 {
 	if (scratch->stream)
 		scratch->update_v3
@@ -8547,6 +8549,13 @@ void dc_update_state_execute(
 
 	if (scratch->probe_updates)
 		dc_update_probes_execute(scratch);
+}
+
+void dc_update_state_execute(
+		const struct dc_update_scratch_space *scratch
+)
+{
+	api_shim_update_state_execute(scratch);
 }
 
 bool dc_update_state_cleanup(
