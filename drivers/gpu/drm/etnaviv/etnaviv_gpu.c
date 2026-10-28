@@ -1176,18 +1176,10 @@ static bool etnaviv_fence_signaled(struct dma_fence *fence)
 	return (s32)(f->gpu->completed_fence - f->base.seqno) >= 0;
 }
 
-static void etnaviv_fence_release(struct dma_fence *fence)
-{
-	struct etnaviv_fence *f = to_etnaviv_fence(fence);
-
-	kfree_rcu(f, base.rcu);
-}
-
 static const struct dma_fence_ops etnaviv_fence_ops = {
 	.get_driver_name = etnaviv_fence_get_driver_name,
 	.get_timeline_name = etnaviv_fence_get_timeline_name,
 	.signaled = etnaviv_fence_signaled,
-	.release = etnaviv_fence_release,
 };
 
 static struct dma_fence *etnaviv_gpu_fence_alloc(struct etnaviv_gpu *gpu)
