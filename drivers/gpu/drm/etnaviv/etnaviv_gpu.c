@@ -1148,8 +1148,8 @@ pm_put:
 
 /* fence object management */
 struct etnaviv_fence {
-	struct etnaviv_gpu *gpu;
 	struct dma_fence base;
+	struct etnaviv_gpu *gpu;
 };
 
 static inline struct etnaviv_fence *to_etnaviv_fence(struct dma_fence *fence)
